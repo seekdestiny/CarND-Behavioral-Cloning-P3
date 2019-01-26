@@ -185,7 +185,7 @@ def define_model():
 
     return model
 
-ef save_model(out_dir, model):
+def save_model(out_dir, model):
     """ Saves model (json) and weights (h5) to disk """
     print('Saving model in %s...' % out_dir)
 
