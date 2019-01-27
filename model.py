@@ -16,7 +16,7 @@ from keras.callbacks import Callback
 import matplotlib.image as mpimg
 import preprocess_input
 
-# Angle offset for the left and right cameras. It's and estimation of the
+# Angle offset for the left and right cameras. It's an estimation of the
 # additional steering angle (normalized to [-1,1]) that we would have to steer
 # if the center camera was in the position of the left or right one
 ANGLE_OFFSET = 0.25
@@ -194,13 +194,7 @@ def save_model(out_dir, model):
         os.makedirs(out_dir)
 
     # Save model
-    model_json = model.to_json()
-    with open(os.path.join(out_dir, 'model.json'), 'w+') as f:
-        json.dump(model_json, f)
-
-    # Save weights
-    model.save_weights(os.path.join(out_dir, 'model.h5'))
-
+    model.save(os.path.join(out_dir, 'model.h5'))
 
 class EpochSaverCallback(Callback):
     def __init__(self, out_dir):
@@ -224,7 +218,7 @@ def train_model(model, save_dir, n_epochs, X, y):
 
     batch_size = BATCH_SIZE
 
-    n_train_samples = 5 * make_multiple(len(y), batch_size)
+    n_train_samples = make_multiple(len(y), batch_size)
     n_val_samples = len(y)
 
     gen_train = train_generator(X, y, batch_size)
