@@ -1,12 +1,17 @@
 # **Behavioral Cloning** 
 
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
+## Abstract
 
 **Behavioral Cloning Project**
+
+In this project, I followd the approach presented by [Nvidia](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). This is introduced in even more powerful network project video. I skipped trying LeNet because it is already used in traffic sign classifier project and more suitable for recognition work.
+
+Data collection and testing are performed in a simulator provided by Udacity. Actually, I used Udacity sample
+driving data for final training. Because my self collected data does not work well.
+
+Since the sample data only consists first track, the trained model manages to successfully drive the car
+indefinitely in track1. In track2, it will quickly crash into one guardrail. More time is needed on fine
+tuned data collection on track2.
 
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
@@ -14,7 +19,6 @@ The goals / steps of this project are the following:
 * Train and validate the model with a training and validation set
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
-
 
 [//]: # (Image References)
 
@@ -35,10 +39,10 @@ The goals / steps of this project are the following:
 #### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* [model.py](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/model.py) containing the script to create and train the model
+* [drive.py](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/drive.py) for driving the car in autonomous mode
+* [model.h5](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/models/model.h5) containing a trained convolution neural network 
+* [writeup_report.md](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/README.md) summarizing the results
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
