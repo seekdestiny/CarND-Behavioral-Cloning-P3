@@ -22,13 +22,8 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image1a]: ./images/arch.png "Model Architecture"
+[image1b]: ./images/model_summary.png "Model Summary"
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -40,6 +35,7 @@ The goals / steps of this project are the following:
 
 My project includes the following files:
 * [model.py](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/model.py) containing the script to create and train the model
+* [preprocess_input.py](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/preprocess_input.py) is used to put all image preprocessed trials together
 * [drive.py](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/drive.py) for driving the car in autonomous mode
 * [model.h5](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/models/model.h5) containing a trained convolution neural network 
 * [writeup_report.md](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/README.md) summarizing the results
@@ -54,13 +50,83 @@ python drive.py model.h5
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
+The basic pipeline is implemented in build_model function. It parsed the csv log file, define model and train
+it. 
+
+```python
+def build_model(log_file_path, n_epochs, save_dir):
+    """ Builds and trains the network given the input data in train_dir """
+
+    # Get training and validation data
+    X, y = get_training_data(log_file_path)
+
+    # Build and train the network
+    model = define_model()
+    train_model(model, save_dir, n_epochs, X, y)
+```
+
 ### Model Architecture and Training Strategy
 
 #### 1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+I have implemented the convolutional neural network proposed by
+[Nvidia](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
+The following picture summarizes the model:
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+![alt text][image1a]
+
+The architecture is a combination of Convolutional layers
+followed by Fully-Connected layers, since the input data is a raw RGB image.
+This time, the architecture is applied to a **regression problem** (predicting
+steering angle) instead of classification, so no activation function
+or softmax must be applied at the last layer, which will have only one neuron.
+
+I also considered transfer learning tech introduced in lecture. But
+after some quick trial on AlexNet, I found it is more suitable for recognition job
+instead of regression problem. And retraining all weights from the scatch is
+computation resource limited which makes it impossible. 
+
+The implemented network consists of the following layers:
+
+- **Input**. Image of size (66, 200, 3). I crop original (160, 320, 3) size to this.
+- **Normalization** to the range [-0.5, 0.5]. This is performed using a _Lambda_ in Keras.
+- **Convolutional 1**. 24 filters of size 5x5x3 (since the input has 3 channels).
+The filter is applied with strides of (2, 2) instead of using MaxPooling.
+This can be done because the input image is relatively high resolution.
+The used padding was 'valid', as proposed by Nvidia.
+
+- **Convolutional 2**. 36 filters of size 5x5x24. Strides of (2, 2).
+- **Convolutional 3**. 48 filters of size 5x5x36. Strides of (2, 2).
+- **Convolutional 4**. 64 filters of size 3x3x48. Strides of (1, 1). As can be
+observed, the filter size and strides are now reduced, given that the input
+images are much smaller.
+- **Convolutional 5**. 64 filters of size 3x3x64. Strides of (1, 1).
+
+- **Flatten**. The input for the next layer will have size 1152.
+- **Dropout** to mitigate the effects of overfitting.
+
+- **Fully Connected 1**, with 100 neurons + Dropout.
+- **Fully Connected 2**, with 50 neurons + Dropout.
+- **Fully Connected 3**, with 10 neurons + Dropout.
+- **Fully Connected 4**, with 1 neuron, being the output.
+
+All the layers, except for the output layer, have a **ELU activation function**.
+The motivation to prefer it over ReLU is that it has a continuous derivative
+and x = 0 and does not kill negative activations. The result is a bit smoother
+steering output.
+
+**Dropout with probability of keeping = 0.25** is used 
+in order to prevent overfitting and have a smooth output.
+
+In addition, all the layers are initialized with the 'glorot_uniform' function,
+default in Keras.
+The main improvement over Nvidia's implementation is to add the Dropout
+layers in order to fight against overfitting.
+
+In total the network has **252219 parameters**, including weights and biases.
+The model summary is attached by calling model.summary in Keras:
+
+![alt text][image1b]
 
 #### 2. Attempts to reduce overfitting in the model
 
