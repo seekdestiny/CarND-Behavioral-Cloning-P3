@@ -188,6 +188,46 @@ class EpochSaverCallback(Callback):
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
 For details about how I created the training data, see the next section. 
+ne of the tasks of this project was **data collection** using the simulator.
+In the first phases of the project own data was collected using the keyboard
+to drive the car. However after using the data for training we observed that
+the keyboard input was really bad, since it provided almost binary commands,
+instead of a continuous range of steering angles.
+
+Most of students recommended the use of a joystick for the project, which
+unfortunately we did not have access to. Fortunately, we were provided with
+a **dataset from Udacity**, which is what we used in the project.
+
+Nonetheless, it's worthwhile describing here the process that we followed
+to manually record training data.
+
+### Strategy
+We recorded data in the following way, keeping a constant speed of 30 mph:
+
+- **Normal driving**, with the vehicle kept in the center of the road.
+Approximately 3 laps of driving. Example images:
+
+![](res/normal1.jpg) ![](res/normal2.jpg)
+
+- **Recovery**. This part is crucial to manage to get the car driving
+the whole lap. Without it, it cannot recover from getting off-center (and
+no matter what you do, this will always happen).
+First, we drove towards the left or right edge of the road,
+without recording. Then we turned on recording, and steered the vehicle back on
+track. This was performed at different distances from the center of the lane.
+We took 2 laps of recording the vehicle recovering from left to center,
+and another 2 laps of recovery from right to center. Example images:
+
+![](res/recovery1.jpg) ![](res/recovery2.jpg)
+
+It was not necessary to drive in the opposite direction, since we extend
+the dataset by flipping the image, as will be described later.
+
+### Udacity's dataset
+As mentioned before, the final model was trained using Udacity's dataset.
+The log file contains 8036 timestamps. For each of them, we have 3 RGB images
+and one steering angle, already normalized. Therefore, the complete
+dataset contains **24108 images**.
 
 ### Model Architecture and Training Strategy
 
