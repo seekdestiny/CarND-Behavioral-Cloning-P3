@@ -130,14 +130,59 @@ The model summary is attached by calling model.summary in Keras:
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model contains dropout layers in order to reduce overfitting (model.py lines 164 - 176). 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+Four drop layers are added after flatten and fully-connected layers as shown above.
+
+The model was trained and validated on different data sets to ensure that the model was not overfitting.
+(model.py lines 65-117)
+
+I use different generators for validation and train data set. Basically, train data set has data augmentation
+technique involded while validation data set not.
+
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 #### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+- **Optimization parameter**: Mean Square Error (mse), since this is a regression
+problem.
 
+- **Optimizer**: Adam, given the great performance on the Traffic Signs Lab.
+We use a learning rate of 0.001 (default value). Smaller values like 0.0001 and
+0.00001 were also tested, but 0.001 gave the best performance.
+
+- **Metrics**: none, just the loss. We observe that the `accuracy` metric
+was quite useless (stayed at around all the time 33%), since it's more
+relevant in classification problems. Here the best available indicator of the
+performance of the network is really the validation loss.
+However we realized soon that to really evaluate the performance we must
+run the model on the simulator, since the loss is not 100% reliable either.
+
+- **Batch size**: 64, to fit in GPU memory.
+- **Number of training samples**: around 40000.
+- **Maximum number of epochs**: 20.
+- **Callbacks**: we implement a callback to save the model after every epoch, in
+case the validation loss was the best so far. This way we can compare
+different models while skipping the ones with worse perforance. This is
+implemented in the `EpochSaverCallback` class:
+
+```python
+class EpochSaverCallback(Callback):
+    def __init__(self, out_dir):
+        self.out_dir = out_dir
+
+    def on_train_begin(self, logs={}):
+        self.losses = []
+
+    def on_epoch_end(self, epoch, logs={}):
+        current_loss = logs.get('val_loss')
+
+        if not self.losses or current_loss < np.amin(self.losses):
+            out_dir = os.path.join(self.out_dir, 'e' + str(epoch+1))
+            save_model(out_dir, self.model)
+
+        self.losses.append(current_loss)
+```
 #### 4. Appropriate training data
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
