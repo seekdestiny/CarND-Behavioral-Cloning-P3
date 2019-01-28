@@ -31,6 +31,9 @@ The goals / steps of this project are the following:
 
 [image1a]: ./images/arch.png "Model Architecture"
 [image1b]: ./images/model_summary.png "Model Summary"
+[image3a]: ./images/3_camera.png "3 Camera"
+[image3b]: ./images/flip.png "Flip"
+[image3c]: ./images/shift.png "Shift"
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -262,12 +265,11 @@ The final model architecture is shown in previous picture and summary.
 
 ##### Data Augmentation
 -----------------
-Below we describe the techniques used to generate additional training data.
+Below I describe the techniques used to generate additional training data.
 
 ##### Use of left and right images
-Even though the model will only use the center camera when testing, we can
-use the left and right cameras for training. The only caveat is that
-we are not provided with a steering angle for those, only for the center camera.
+As mentioned in project video, we can use left and right cameras' pics for training
+by apply proper offset for steering angle.
 
 The solution is to add or subtract an offset `ANGLE_OFFSET = 0.25` to the steering angle
 of the center camera, for the left and right camera, respectively. This is similar
@@ -276,13 +278,13 @@ the image from the left camera will require a bigger turning angle to the right,
 since it's closer to the left edge of the road. Similarly for the right camera.
 
 The result can be observed in the following picture:
-![](res/three_cam.jpg)
+![alt text][image3a]
 
 ##### Horizontal flipping
 
-To avoid bias towards driving in only one direction of the track, we randomly
+To avoid bias towards driving in only one direction of the track, I randomly
 flip the images horizontally to emulate driving in the opposite direction.
-Of course we need to negate the steering angle. This is accomplished with the
+Of course I need to negate the steering angle. This is accomplished with the
 following code:
 
 ```python
@@ -298,12 +300,11 @@ def random_horizontal_flip(x, y):
 
 Example case:
 
-![](res/flipping.jpg)
-
+![alt text][image3b]
 
 ##### Random horizontal shift
 
-Finally, we generate even more data by performing random horizontal shifts
+Finally, I generate even more data by performing random horizontal shifts
 to the image. This is equivalent to having an infinite number of camera
 positions between the left and right camera. 
 
@@ -332,23 +333,19 @@ def random_translation(img, steering):
 
 Example results:
 
-![](res/shift.jpg)
-
+![alt text][image3c]
 
 ##### Data Preprocessing
 ------------------
-Before sending the input images to the neural network, we perform the following
+Before sending the input images to the neural network, I perform the following
 preprocessing steps:
 
 1. Image resize to have a width of 200, keeping the aspect ratio.
 2. Image crop to have a height of 66. We remove the pixels from the top of the
    the image, since they belong to the sky, which contains no relevant information.
 
-We do **not** convert the RGB images to YUV, as proposed by Nvidia. We tested
-it but provided no real improvement over the raw RGB data, as confirmed by
-other students. Therefore we skipped this step to have a faster pipeline.
-
-This pipeline is implemented in a separate file, `preprocess_input.py`,
+I first put the implementation in model.py and then later I noticed it is 
+also needed in drive.py. Then I put it in a separate file, `preprocess_input.py`,
 so it can be use both by `model.py` and `drive.py`:
 
 ```python
@@ -367,7 +364,7 @@ def resize(x):
     return x[crop_height:, :, :]
 ```
 
-In addition, we perform **image normalization** to the range [-0.5, 0.5]
+In addition, I perform **image normalization** to the range [-0.5, 0.5]
 in the model using a `Lambda` layer:
 
 ```python
@@ -387,12 +384,12 @@ The following settings have been used:
 - Screen resolution: 1024x768.
 - Graphics quality: Fastest.
 
-### Track 1
+##### Track 1
 It works well.
 
-See `track1.mkv` for full demostration.
+See [`track1.mkv`](https://github.com/seekdestiny/CarND-Behavioral-Cloning-P3/blob/master/run1.mp4) for full demostration.
 
-### Track 2
+##### Track 2
 
 It quickly crashed into roadside. I need to spend time carefully collecting
 some meaningful data to train the model more
