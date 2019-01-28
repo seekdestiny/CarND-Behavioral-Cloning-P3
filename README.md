@@ -192,6 +192,7 @@ class EpochSaverCallback(Callback):
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
+I employed data augmentation to improve 
 For details about how I created the training data, see the next section. 
 ne of the tasks of this project was **data collection** using the simulator.
 In the first phases of the project own data was collected using the keyboard
@@ -251,36 +252,126 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 #### 2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-![alt text][image1]
+The final model architecture is shown in previous picture and summary.
 
 #### 3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+##### Data Augmentation
+-----------------
+Below we describe the techniques used to generate additional training data.
 
-![alt text][image2]
+##### Use of left and right images
+Even though the model will only use the center camera when testing, we can
+use the left and right cameras for training. The only caveat is that
+we are not provided with a steering angle for those, only for the center camera.
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+The solution is to add or subtract an offset `ANGLE_OFFSET = 0.25` to the steering angle
+of the center camera, for the left and right camera, respectively. This is similar
+to having 3 cars driving in parallel, one at each camera position. Intuitively,
+the image from the left camera will require a bigger turning angle to the right,
+since it's closer to the left edge of the road. Similarly for the right camera.
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+The result can be observed in the following picture:
+![](res/three_cam.jpg)
 
-Then I repeated this process on track two in order to get more data points.
+##### Horizontal flipping
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+To avoid bias towards driving in only one direction of the track, we randomly
+flip the images horizontally to emulate driving in the opposite direction.
+Of course we need to negate the steering angle. This is accomplished with the
+following code:
 
-![alt text][image6]
-![alt text][image7]
+```python
+def random_horizontal_flip(x, y):
+    flip = np.random.randint(2)
 
-Etc ....
+    if flip:
+        x = cv2.flip(x, 1)
+        y = -y
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+    return x, y
+```
+
+Example case:
+
+![](res/flipping.jpg)
 
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
+##### Random horizontal shift
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+Finally, we generate even more data by performing random horizontal shifts
+to the image. This is equivalent to having an infinite number of camera
+positions between the left and right camera. 
+
+We set a maximum translation range of +- 50 pixels, which we observed is approximately
+the distance between the left/right and center camera. This is implemented as
+follows:
+
+```python
+def random_translation(img, steering):
+    # Maximum shift of the image, in pixels
+    trans_range = 50  # Pixels
+
+    # Compute translation and corresponding steering angle
+    tr_x = np.random.uniform(-trans_range, trans_range)
+    steering = steering + (tr_x / trans_range) * ANGLE_OFFSET
+
+    # Warp image using the computed translation
+    rows = img.shape[0]
+    cols = img.shape[1]
+
+    M = np.float32([[1,0,tr_x],[0,1,0]])
+    img = cv2.warpAffine(img,M,(cols,rows))
+
+    return img, steering
+```
+
+Example results:
+
+![](res/shift.jpg)
+
+
+##### Data Preprocessing
+------------------
+Before sending the input images to the neural network, we perform the following
+preprocessing steps:
+
+1. Image resize to have a width of 200, keeping the aspect ratio.
+2. Image crop to have a height of 66. We remove the pixels from the top of the
+   the image, since they belong to the sky, which contains no relevant information.
+
+We do **not** convert the RGB images to YUV, as proposed by Nvidia. We tested
+it but provided no real improvement over the raw RGB data, as confirmed by
+other students. Therefore we skipped this step to have a faster pipeline.
+
+This pipeline is implemented in a separate file, `preprocess_input.py`,
+so it can be use both by `model.py` and `drive.py`:
+
+```python
+FINAL_IMG_SHAPE = (66, 200, 3)
+
+def resize(x):
+    height = x.shape[0]
+    width = x.shape[1]
+
+    factor = float(FINAL_IMG_SHAPE[1]) / float(width)
+
+    resized_size = (int(width*factor), int(height*factor))
+    x = cv2.resize(x, resized_size)
+    crop_height = resized_size[1] - FINAL_IMG_SHAPE[0]
+
+    return x[crop_height:, :, :]
+```
+
+In addition, we perform **image normalization** to the range [-0.5, 0.5]
+in the model using a `Lambda` layer:
+
+```python
+def normalize(X):
+    """ Normalizes the input between -0.5 and 0.5 """
+    return X / 255. - 0.5
+```
+```python
+model.add(Lambda(normalize, input_shape=input_shape, output_shape=input_shape))
+
+
