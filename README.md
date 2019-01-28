@@ -278,6 +278,7 @@ the image from the left camera will require a bigger turning angle to the right,
 since it's closer to the left edge of the road. Similarly for the right camera.
 
 The result can be observed in the following picture:
+
 ![alt text][image3a]
 
 ##### Horizontal flipping
