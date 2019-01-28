@@ -3,7 +3,7 @@
 ## Track1 Video
 
 <p align="center">
- <a href="https://www.youtube.com/embed/VYj63bDL_ag"><img src="./img/overview.gif" alt="Overview" width="50%" height="50%"></a>
+ <a href="https://www.youtube.com/embed/VYj63bDL_ag"><img src="./images/overview.jpg" alt="Overview" width="50%" height="50%"></a>
  <br>run1.mp4. (click for full video)
 </p>
 
