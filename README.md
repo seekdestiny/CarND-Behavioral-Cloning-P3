@@ -4,7 +4,7 @@
 
 <p align="center">
  <a href="https://www.youtube.com/embed/VYj63bDL_ag"><img src="./img/overview.gif" alt="Overview" width="50%" height="50%"></a>
- <br>Qualitative results. (click for full video)
+ <br>run1.mp4. (click for full video)
 </p>
 
 ## Abstract
@@ -197,44 +197,41 @@ class EpochSaverCallback(Callback):
 ```
 #### 4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road. 
 
-I employed data augmentation to improve 
-For details about how I created the training data, see the next section. 
-ne of the tasks of this project was **data collection** using the simulator.
-In the first phases of the project own data was collected using the keyboard
-to drive the car. However after using the data for training we observed that
-the keyboard input was really bad, since it provided almost binary commands,
-instead of a continuous range of steering angles.
+I employed data augmentation to improve final test result. This is described
+in later section.
 
-Most of students recommended the use of a joystick for the project, which
-unfortunately we did not have access to. Fortunately, we were provided with
-a **dataset from Udacity**, which is what we used in the project.
+I also try to collect data myself to generalize the train data set.
+However, using mouse or keyboard to generate clean data is very challenge
+part for this project. I often press keyboard too hard or hold the key a little
+longer to cread relative big steering angle, not mentioned to control the car
+at some constant speed (sometimes too fast or sometimes too slow).
+Variated speed seems to introduce weird behavior in final test result.
 
-Nonetheless, it's worthwhile describing here the process that we followed
-to manually record training data.
+And since controlling the car is difficult, many movements from center to side is
+recorded in the dataset. It is hard to remove them by hitting record button to
+pause or restart recording every time. 
+
+So, finally I decided to take advantage of **dataset from Udacity** which works
+at least well for track1 test. 
 
 ##### Strategy
-We recorded data in the following way, keeping a constant speed of 30 mph:
+During my own collection, I try some stuff mentioned in project introduction videos to record data.
 
 - **Normal driving**, with the vehicle kept in the center of the road.
-Approximately 3 laps of driving. Example images:
+Drive a few laps instead of only one to collect enough data.
 
-![](res/normal1.jpg) ![](res/normal2.jpg)
-
-- **Recovery**. This part is crucial to manage to get the car driving
-the whole lap. Without it, it cannot recover from getting off-center (and
-no matter what you do, this will always happen).
-First, we drove towards the left or right edge of the road,
-without recording. Then we turned on recording, and steered the vehicle back on
+- **Recovery**. I tried to create movement from side to center.
+I drove towards the left or right edge of the road,
+without recording. Then I turned on recording, and steered the vehicle back on
 track. This was performed at different distances from the center of the lane.
-We took 2 laps of recording the vehicle recovering from left to center,
-and another 2 laps of recovery from right to center. Example images:
+But I can only do it in very low speed otherwise the car will cross the center to
+move towards another side. I add the recovery data point to dataset but the car
+still get off road at very sharp curve. 
 
-![](res/recovery1.jpg) ![](res/recovery2.jpg)
-
-It was not necessary to drive in the opposite direction, since we extend
-the dataset by flipping the image, as will be described later.
+I did not drive in counter-clockwise because I flip the image when I
+create train data set.
 
 ##### Udacity's dataset
 As mentioned before, the final model was trained using Udacity's dataset.
