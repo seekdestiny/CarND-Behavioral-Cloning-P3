@@ -144,25 +144,30 @@ The model was tested by running it through the simulator and ensuring that the v
 
 #### 3. Model parameter tuning
 
-- **Optimization parameter**: Mean Square Error (mse), since this is a regression
-problem.
+- **Optimization parameter**: Use Mean Square Error (mse) instead of cross_entropy, 
+since this is a regression problem.
 
 - **Optimizer**: Adam, given the great performance on the Traffic Signs Lab.
 We use a learning rate of 0.001 (default value). Smaller values like 0.0001 and
 0.00001 were also tested, but 0.001 gave the best performance.
 
-- **Metrics**: none, just the loss. We observe that the `accuracy` metric
-was quite useless (stayed at around all the time 33%), since it's more
-relevant in classification problems. Here the best available indicator of the
-performance of the network is really the validation loss.
-However we realized soon that to really evaluate the performance we must
-run the model on the simulator, since the loss is not 100% reliable either.
+- **Batch size**: 64 (or 128), to fit in GPU memory.
 
-- **Batch size**: 64, to fit in GPU memory.
-- **Number of training samples**: around 40000.
-- **Maximum number of epochs**: 20.
-- **Callbacks**: we implement a callback to save the model after every epoch, in
-case the validation loss was the best so far. This way we can compare
+- **Number of training samples**: 8036. I tried to put own collected data and udacity
+data together which has around 20000 samples. But later I found my own data just
+introduce more loss so I finally use 8036 samples of udacity for final training.
+
+- **Maximum number of epochs**: 1. I started by 20 epochs but I quickly noticed
+it takes much effort to train it even if I run it in workspace. Then I tried
+5 epochs, observed loss and then tested each epoch's model by using callbacks tech. 
+I found with data augmentation and proper parameter tuning only one epoch can also 
+provide good result on track1. And only one epoch can take 10 mins train because
+I have only one tesla gpu available in workspace.
+
+- **Callbacks**: I implement a callback to save the model after every epoch, in
+case the validation loss oscillated during train procedure. The train time cost
+is really high even if the architecture is relatively simple compared to other
+famous CNN. So, it is important to save all midstep model. This way we can compare
 different models while skipping the ones with worse perforance. This is
 implemented in the `EpochSaverCallback` class:
 
