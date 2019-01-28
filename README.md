@@ -2,7 +2,10 @@
 
 ## Track1 Video
 
-<iframe width="100%" height="300" src="https://www.youtube.com/embed/VYj63bDL_ag" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<p align="center">
+ <a href="https://www.youtube.com/embed/VYj63bDL_ag"><img src="./img/overview.gif" alt="Overview" width="50%" height="50%"></a>
+ <br>Qualitative results. (click for full video)
+</p>
 
 ## Abstract
 
