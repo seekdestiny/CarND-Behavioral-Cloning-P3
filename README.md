@@ -1,5 +1,9 @@
 # **Behavioral Cloning** 
 
+## Track1 Video
+
+<iframe width="100%" height="300" src="https://www.youtube.com/embed/VYj63bDL_ag" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Abstract
 
 **Behavioral Cloning Project**
@@ -207,7 +211,7 @@ a **dataset from Udacity**, which is what we used in the project.
 Nonetheless, it's worthwhile describing here the process that we followed
 to manually record training data.
 
-### Strategy
+##### Strategy
 We recorded data in the following way, keeping a constant speed of 30 mph:
 
 - **Normal driving**, with the vehicle kept in the center of the road.
@@ -229,7 +233,7 @@ and another 2 laps of recovery from right to center. Example images:
 It was not necessary to drive in the opposite direction, since we extend
 the dataset by flipping the image, as will be described later.
 
-### Udacity's dataset
+##### Udacity's dataset
 As mentioned before, the final model was trained using Udacity's dataset.
 The log file contains 8036 timestamps. For each of them, we have 3 RGB images
 and one steering angle, already normalized. Therefore, the complete
@@ -373,5 +377,22 @@ def normalize(X):
 ```
 ```python
 model.add(Lambda(normalize, input_shape=input_shape, output_shape=input_shape))
+```
 
+Test Results
+------------------
+After training, I evaluate the performance on the simulator for both tracks.
+The following settings have been used:
 
+- Screen resolution: 1024x768.
+- Graphics quality: Fastest.
+
+### Track 1
+It works well.
+
+See `track1.mkv` for full demostration.
+
+### Track 2
+
+It quickly crashed into roadside. I need to spend time carefully collecting
+some meaningful data to train the model more
